@@ -68,12 +68,16 @@ def formatInfo(rawInfo):
 
 def moveAllFile(src, dst):
 	content = os.listdir(src)
-	for name in content:
-		shutil.move(os.path.join(src, name), dst)
+	try:
+		for name in content:
+			shutil.move(os.path.join(src, name), dst)
+	except Exception as e:
+		print('Problem while moving {}. Is longPath enabled ?'.format(os.path.join(src, name)))
+		raise e
 
 def getStudentWorkspace(submitDir, workspace):
 	file = findFile(submitDir, ['.py', '.zip', '.rar', '.7z', '.tar', '.tar.gz', '.tgz'])
-	
+
 	if file.endswith('.py'):
 		moveAllFile(os.path.dirname(file), workspace)
 
@@ -90,7 +94,7 @@ def processSubmitDir(submitDir, workspaces, jsonContent):
 	workspace = findFreeName(studentDir, 'workspace')
 	os.mkdir(workspace)
 	data['workspace'] = workspace
-	data['comment'] = ["first comment"]
+	data['comment'] = []
 	try:
 		getStudentWorkspace(submitDir, workspace)
 	except FileNotFoundError as e:
