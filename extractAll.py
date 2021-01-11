@@ -95,14 +95,19 @@ def processSubmitDir(submitDir, workspaces, jsonContent):
 	os.mkdir(workspace)
 	data['workspace'] = workspace
 	data['comment'] = []
+
+	def handleError():
+		print('ERROR with {} ({}):\n   {}\n'.format(data['matricule'], data['name'], data['comment'].join('\n   ')))
+		moveAllFile(submitDir, workspace)
+
 	try:
 		getStudentWorkspace(submitDir, workspace)
 	except FileNotFoundError as e:
 		data['comment'].append('No python file found')
-		print(data)
+		handleError()
 	except BadArchive as e:
 		data['comment'].append(str(e))
-		print(data)
+		handleError()
 
 	comment = data['comment']
 	if 'comment' in jsonContent:
@@ -116,7 +121,7 @@ def processSubmitDir(submitDir, workspaces, jsonContent):
 
 def extractArchive(archiveFile, extractDir):
 	try:
-		res = run(['7z', 'x', archiveFile, f'-o{os.path.abspath(extractDir)}'], stdout=DEVNULL)
+		res = run(['7z', 'x', archiveFile, f'-o{os.path.abspath(extractDir)}'], stdout=DEVNULL, stderr=DEVNULL)
 		if res.returncode != 0:
 			raise Exception()
 	except:
